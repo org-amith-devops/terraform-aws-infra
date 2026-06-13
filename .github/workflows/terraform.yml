@@ -41,15 +41,14 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-      # - name: Install Terrascan
-      #   run: |
-      #     curl -fsSL https://raw.githubusercontent.com/tenable/terrascan/master/scripts/install.sh | bash
-
-      # - name: Run Terrascan
-      #   run: terrascan scan -i terraform
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          framework: terraform
 
       - name: Terraform Plan
         run: terraform plan -input=false
 
-      - name: Terraform Apply        
+      - name: Terraform Apply
         run: terraform apply -auto-approve -input=false
