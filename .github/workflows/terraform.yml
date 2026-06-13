@@ -32,14 +32,27 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+
       - name: Terraform Init
         run: terraform init
 
       - name: Terraform Validate
         run: terraform validate
 
+      - name: Install Terrascan
+        run: |
+          curl -L https://github.com/tenable/terrascan/releases/latest/download/terrascan_Linux_x86_64.tar.gz -o terrascan.tar.gz
+          tar -xzf terrascan.tar.gz
+          sudo install terrascan /usr/local/bin/
+
+      - name: Run Terrascan
+        run: terrascan scan -i terraform
+
       - name: Terraform Plan
-        run: terraform plan
+        run: terraform plan -input=false
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        if: github.ref == 'refs/heads/main'
+        run: terraform apply -auto-approve -input=false
