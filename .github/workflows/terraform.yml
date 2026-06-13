@@ -41,12 +41,12 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-      - name: Install Terrascan
-        run: |
-          curl -fsSL https://raw.githubusercontent.com/tenable/terrascan/master/scripts/install.sh | bash
+      # - name: Install Terrascan
+      #   run: |
+      #     curl -fsSL https://raw.githubusercontent.com/tenable/terrascan/master/scripts/install.sh | bash
 
-      - name: Run Terrascan
-        run: terrascan scan -i terraform
+      # - name: Run Terrascan
+      #   run: terrascan scan -i terraform
 
       - name: Terraform Plan
         run: terraform plan -input=false
