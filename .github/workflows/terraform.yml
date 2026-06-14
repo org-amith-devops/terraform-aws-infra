@@ -3,8 +3,10 @@ name: Terraform Deploy
 on:
   push:
     branches:
-      - main
-      - feature/*
+    - dev
+    - test
+    - main
+    - feature/*
   workflow_dispatch:
 
 permissions:
@@ -15,13 +17,24 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: environments/dev
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Set Environment
+        run: |
+          if [[ "${GITHUB_REF_NAME}" == "dev" ]]; then
+            echo "ENV=dev" >> $GITHUB_ENV
+          elif [[ "${GITHUB_REF_NAME}" == "test" ]]; then
+            echo "ENV=test" >> $GITHUB_ENV
+          elif [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+            echo "ENV=prod" >> $GITHUB_ENV
+          else
+            echo "ENV=dev" >> $GITHUB_ENV
+          fi
+
+      - name: Display Environment
+        run: echo "Deploying to $ENV"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -33,23 +46,28 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Format Check
+        working-directory: environments/${{ env.ENV }}
         run: terraform fmt -check -recursive
 
       - name: Terraform Init
-        run: terraform init
+        working-directory: environments/${{ env.ENV }}
+        run: terraform init -reconfigure
 
       - name: Terraform Validate
+        working-directory: environments/${{ env.ENV }}
         run: terraform validate
 
       - name: Run Checkov
         uses: bridgecrewio/checkov-action@master
         with:
-          directory: .
+          directory: environments/${{ env.ENV }}
           framework: terraform
           soft_fail: true
 
       - name: Terraform Plan
+        working-directory: environments/${{ env.ENV }}
         run: terraform plan -input=false
 
       - name: Terraform Apply
+        working-directory: environments/${{ env.ENV }}
         run: terraform apply -auto-approve -input=false
