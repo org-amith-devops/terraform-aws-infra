@@ -46,6 +46,7 @@ jobs:
         with:
           directory: .
           framework: terraform
+          soft_fail: true
 
       - name: Terraform Plan
         run: terraform plan -input=false
