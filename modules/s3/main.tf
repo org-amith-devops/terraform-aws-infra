@@ -14,4 +14,4 @@ resource "aws_s3_bucket_versioning" "this" {
     status = "Enabled"
   }
 }
-# test_01
+# test_02
