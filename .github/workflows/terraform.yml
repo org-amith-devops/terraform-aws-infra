@@ -44,6 +44,13 @@ jobs:
         working-directory: environments/dev
         run: terraform validate
 
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: environments/dev
+          framework: terraform
+          soft_fail: true
+
       - name: Terraform Plan
         working-directory: environments/dev
         run: terraform plan -input=false
@@ -83,6 +90,13 @@ jobs:
         working-directory: environments/test
         run: terraform validate
 
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: environments/test
+          framework: terraform
+          soft_fail: true
+
       - name: Terraform Plan
         working-directory: environments/test
         run: terraform plan -input=false
@@ -121,6 +135,13 @@ jobs:
       - name: Terraform Validate
         working-directory: environments/prod
         run: terraform validate
+
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: environments/prod
+          framework: terraform
+          soft_fail: true
 
       - name: Terraform Plan
         working-directory: environments/prod
