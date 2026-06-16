@@ -1,5 +1,5 @@
 resource "aws_eks_cluster" "example" {
-  name     = var.aks_name
+  name = var.aks_name
 
   access_config {
     authentication_mode = "API"
