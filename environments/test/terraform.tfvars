@@ -1,3 +1,3 @@
-aws_region  = "ap-south-1"
-bucket_name = "amith-dev-s3-bucket"
-environment = "test"
+aws_region   = "ap-south-1"
+bucket_name  = "amith-test-s3-bucket"
+environment  = "test"
