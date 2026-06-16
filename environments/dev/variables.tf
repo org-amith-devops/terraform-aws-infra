@@ -13,3 +13,7 @@ variable "bucket_name" {
 variable "vpc_name" {
   type = string
 }
+
+variable "aks_name" {
+  type = string
+}

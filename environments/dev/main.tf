@@ -23,3 +23,13 @@ module "vpc" {
     "ap-south-1c"
   ]
 }
+
+module "eks" {
+  source = "../../modules/eks"
+
+  aks_name   = var.aks_name
+  environment = var.environment
+  vpc_id      = module.vpc.vpc_id
+  subnet_ids  = module.vpc.private_subnet_ids
+
+}
