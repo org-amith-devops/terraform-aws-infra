@@ -5,18 +5,18 @@ on:
     branches:
       - main
       - develop
+      - feature
       - feature/*
   workflow_dispatch:
-
     inputs:
       environment:
         description: "Select Environment"
         required: true
         type: choice
         options:
-        - dev
-        - test
-        - prod
+          - dev
+          - test
+          - prod
 
 permissions:
   id-token: write
@@ -24,23 +24,31 @@ permissions:
 
 jobs:
   terraform:
+
     runs-on: ubuntu-latest
 
     env:
-      ENV: ${{ github.event.inputs.environment }}
+      ENV: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || github.ref_name == 'main' && 'prod' || github.ref_name == 'develop' && 'test' || 'dev' }}
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Show Selected Environment
-        run: echo "Deploying to $ENV"
+      - name: Show Environment
+        run: |
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Environment: $ENV"
+
+      - name: Debug Directory Structure
+        run: |
+          pwd
+          ls -R
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::654654541855:role/Role_01
-          aws-region: us-east-1
+          aws-region: ap-south-1
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -71,3 +79,4 @@ jobs:
       - name: Terraform Apply
         working-directory: environments/${{ env.ENV }}
         run: terraform apply -auto-approve -input=false
+        
