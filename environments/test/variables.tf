@@ -10,6 +10,6 @@ variable "aws_region" {
   type = string
 }
 
-variable "project_name" {
+variable "vpc_name" {
   type = string
 }

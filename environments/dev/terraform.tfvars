@@ -1,4 +1,4 @@
-project_name = "amith-terraform-infra"
-aws_region   = "ap-south-1"
-bucket_name  = "amith-dev-s3-bucket"
-environment  = "dev"
+aws_region  = "ap-south-1"
+environment = "dev"
+bucket_name = "dev-s3-bucket"
+vpc_name    = "dev-vpc"
