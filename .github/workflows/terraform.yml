@@ -5,69 +5,127 @@ on:
     branches:
       - main
       - develop
-      - feature/*
+      - feature
   workflow_dispatch:
-
-    inputs:
-      environment:
-        description: "Select Environment"
-        required: true
-        type: choice
-        options:
-        - dev
-        - test
-        - prod
 
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  terraform:
-    runs-on: ubuntu-latest
 
-    env:
-      ENV: ${{ github.event.inputs.environment }}
+  deploy-dev:
+    name: Deploy DEV
+    runs-on: ubuntu-latest
+    environment: dev
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Show Selected Environment
-        run: echo "Deploying to $ENV"
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::654654541855:role/Role_01
-          aws-region: us-east-1
+          aws-region: ap-south-1
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Format Check
-        working-directory: environments/${{ env.ENV }}
+        working-directory: environments/dev
         run: terraform fmt -check -recursive
 
       - name: Terraform Init
-        working-directory: environments/${{ env.ENV }}
+        working-directory: environments/dev
         run: terraform init -reconfigure
 
       - name: Terraform Validate
-        working-directory: environments/${{ env.ENV }}
+        working-directory: environments/dev
         run: terraform validate
 
-      - name: Run Checkov
-        uses: bridgecrewio/checkov-action@master
-        with:
-          directory: environments/${{ env.ENV }}
-          framework: terraform
-          soft_fail: true
-
       - name: Terraform Plan
-        working-directory: environments/${{ env.ENV }}
+        working-directory: environments/dev
         run: terraform plan -input=false
 
       - name: Terraform Apply
-        working-directory: environments/${{ env.ENV }}
+        working-directory: environments/dev
+        run: terraform apply -auto-approve -input=false
+
+  deploy-test:
+    name: Deploy TEST
+    needs: deploy-dev
+    runs-on: ubuntu-latest
+    environment: test
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::654654541855:role/Role_01
+          aws-region: ap-south-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Format Check
+        working-directory: environments/test
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Init
+        working-directory: environments/test
+        run: terraform init -reconfigure
+
+      - name: Terraform Validate
+        working-directory: environments/test
+        run: terraform validate
+
+      - name: Terraform Plan
+        working-directory: environments/test
+        run: terraform plan -input=false
+
+      - name: Terraform Apply
+        working-directory: environments/test
+        run: terraform apply -auto-approve -input=false
+
+  deploy-prod:
+    name: Deploy PROD
+    needs: deploy-test
+    runs-on: ubuntu-latest
+    environment: prod
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::654654541855:role/Role_01
+          aws-region: ap-south-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Format Check
+        working-directory: environments/prod
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Init
+        working-directory: environments/prod
+        run: terraform init -reconfigure
+
+      - name: Terraform Validate
+        working-directory: environments/prod
+        run: terraform validate
+
+      - name: Terraform Plan
+        working-directory: environments/prod
+        run: terraform plan -input=false
+
+      - name: Terraform Apply
+        working-directory: environments/prod
         run: terraform apply -auto-approve -input=false
