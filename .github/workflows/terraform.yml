@@ -16,9 +16,7 @@ jobs:
 
   deploy-dev:
     name: Deploy DEV
-    if: startsWith(github.ref_name, 'feature')
     runs-on: ubuntu-latest
-
     environment: dev
 
     steps:
@@ -56,9 +54,8 @@ jobs:
 
   deploy-test:
     name: Deploy TEST
-    if: github.ref_name == 'develop'
+    needs: deploy-dev
     runs-on: ubuntu-latest
-
     environment: test
 
     steps:
@@ -96,9 +93,8 @@ jobs:
 
   deploy-prod:
     name: Deploy PROD
-    if: github.ref_name == 'main'
+    needs: deploy-test
     runs-on: ubuntu-latest
-
     environment: prod
 
     steps:
