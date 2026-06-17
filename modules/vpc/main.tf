@@ -16,23 +16,22 @@ resource "aws_internet_gateway" "main" {
   }
 }
 
-resource "aws_subnet" "public" {
+resource "aws_subnet" "private" {
   count = length(var.private_subnet_cidrs)
 
   vpc_id                  = aws_vpc.main.id
   cidr_block              = var.private_subnet_cidrs[count.index]
   availability_zone       = var.azs[count.index]
-  map_public_ip_on_launch = true
-
+  
   tags = {
-    Name = "${var.vpc_name}-public-${count.index + 1}"
+    Name = "${var.vpc_name}-private-${count.index + 1}"
 
     "kubernetes.io/cluster/dev-aks-cluster" = "shared"
     "kubernetes.io/role/elb"                = "1"
   }
 }
 
-resource "aws_route_table" "public" {
+resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
 
   route {
@@ -41,13 +40,13 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name = "${var.vpc_name}-public-rt"
+    Name = "${var.vpc_name}-private-rt"
   }
 }
 
-resource "aws_route_table_association" "public" {
+resource "aws_route_table_association" "private" {
   count = length(var.private_subnet_cidrs)
 
-  subnet_id      = aws_subnet.public[count.index].id
-  route_table_id = aws_route_table.public.id
+  subnet_id      = aws_subnet.private[count.index].id
+  route_table_id = aws_route_table.private.id
 }
